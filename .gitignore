@@ -1,0 +1,9 @@
+# 添加到 .gitignore
+.env
+*.pyc
+__pycache__/
+venv/
+.venv/
+evaluation_results/
+*.log
+.DS_Store
