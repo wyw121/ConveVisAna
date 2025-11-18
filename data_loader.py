@@ -223,6 +223,33 @@ class ChatDataLoader:
                 })
         
         return qa_pairs
+    
+    def get_conversation_turns(self, conversation: Conversation) -> List[Dict[str, str]]:
+        """
+        获取完整对话流的所有回合(用于流程分析)
+        
+        Args:
+            conversation: 对话对象
+            
+        Returns:
+            对话回合列表，每个元素包含 'question' 和 'answer'
+        """
+        turns = []
+        
+        for i in range(len(conversation.messages) - 1):
+            current_msg = conversation.messages[i]
+            next_msg = conversation.messages[i + 1]
+            
+            # 用户问题 -> 助手回答
+            if current_msg.role == 'user' and next_msg.role == 'assistant':
+                turns.append({
+                    'question': current_msg.content,
+                    'answer': next_msg.content,
+                    'turn_index': len(turns) + 1,
+                    'timestamp': current_msg.create_time
+                })
+        
+        return turns
 
 
 if __name__ == '__main__':
