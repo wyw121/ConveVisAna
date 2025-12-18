@@ -34,6 +34,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",  # Next.js 开发环境
+        "http://localhost:3001",  # Next.js 开发环境 (备用端口)
         "http://localhost:5173",  # Vite 开发环境
         "https://*.vercel.app",   # Vercel 部署
         "https://*.netlify.app",  # Netlify 部署
