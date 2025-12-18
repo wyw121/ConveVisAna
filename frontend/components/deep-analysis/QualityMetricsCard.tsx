@@ -26,42 +26,48 @@ interface QualityMetricsCardProps {
 export default function QualityMetricsCard({ data }: QualityMetricsCardProps) {
   const { metrics, pairs_evaluated, average_score, cached } = data;
 
+  // 安全获取指标分数，处理失败或缺失的情况
+  const getMetricScore = (metric: any): number => {
+    if (!metric || typeof metric.score !== 'number') return 0;
+    return metric.score;
+  };
+
   // 雷达图数据
   const radarData = [
     { 
       metric: 'Relevancy', 
-      value: metrics.relevancy.score * 100,
+      value: getMetricScore(metrics?.relevancy) * 100,
       fullMark: 100 
     },
     { 
       metric: 'Helpfulness', 
-      value: metrics.helpfulness.score * 100,
+      value: getMetricScore(metrics?.helpfulness) * 100,
       fullMark: 100 
     },
     { 
       metric: 'Coherence', 
-      value: metrics.coherence.score * 100,
+      value: getMetricScore(metrics?.coherence) * 100,
       fullMark: 100 
     },
     { 
       metric: 'Low Toxicity', 
-      value: (1 - metrics.toxicity.score) * 100,
+      value: (1 - getMetricScore(metrics?.toxicity)) * 100,
       fullMark: 100 
     },
     { 
       metric: 'Low Bias', 
-      value: (1 - metrics.bias.score) * 100,
+      value: (1 - getMetricScore(metrics?.bias)) * 100,
       fullMark: 100 
     },
   ];
 
   // 计算整体得分
   const overallScore = average_score || 
-    (metrics.relevancy.score + 
-     metrics.helpfulness.score + 
-     metrics.coherence.score + 
-     (1 - metrics.toxicity.score) + 
-     (1 - metrics.bias.score)) / 5;
+    (getMetricScore(metrics?.relevancy) + 
+     getMetricScore(metrics?.helpfulness) + 
+     getMetricScore(metrics?.coherence) + 
+     (1 - getMetricScore(metrics?.toxicity)) + 
+     (1 - getMetricScore(metrics?.bias))) / 5;
 
   // 获取等级和颜色
   const getScoreLevel = (score: number) => {
@@ -151,7 +157,33 @@ export default function QualityMetricsCard({ data }: QualityMetricsCardProps) {
         {/* 指标卡片网格 */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {metricsConfig.map(({ key, label, icon: Icon, inverse }) => {
-            const metric = metrics[key as keyof typeof metrics];
+            const metric = metrics?.[key as keyof typeof metrics];
+            
+            // 安全检查：如果指标不存在或评估失败
+            if (!metric || typeof metric.score !== 'number') {
+              return (
+                <div 
+                  key={key}
+                  className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700"
+                >
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Icon className="w-5 h-5 text-gray-400" />
+                    <h3 className="font-semibold text-gray-900 dark:text-white">
+                      {label}
+                    </h3>
+                  </div>
+                  <p className="text-sm text-yellow-600 dark:text-yellow-400">
+                    评估失败或数据缺失
+                  </p>
+                  {metric?.error && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                      {metric.error}
+                    </p>
+                  )}
+                </div>
+              );
+            }
+            
             const displayScore = inverse ? (1 - metric.score) : metric.score;
             const passed = metric.passed;
             
