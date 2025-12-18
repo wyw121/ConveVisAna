@@ -213,7 +213,7 @@ def main():
     from custom_llm import create_deepseek_chat
     import os
     from dotenv import load_dotenv
-    from data_loader import ChatDataLoader
+    from core.data_loader import ChatDataLoader
     
     load_dotenv()
     

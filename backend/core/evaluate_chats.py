@@ -23,8 +23,8 @@ from deepeval.metrics import (
 )
 from deepeval.test_case import LLMTestCaseParams
 
-from data_loader import ChatDataLoader
-from custom_llm import ChatAIAPIModel, create_deepseek_chat
+from core.data_loader import ChatDataLoader
+from core.custom_llm import ChatAIAPIModel, create_deepseek_chat
 
 
 # 加载环境变量
