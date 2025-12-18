@@ -65,6 +65,7 @@ class HealthResponse(BaseModel):
     status: str
     version: str
     api_available: bool
+    has_api_key: bool  # 前端期望的字段
 
 
 # ============ 辅助函数 ============
