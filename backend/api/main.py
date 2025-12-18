@@ -105,7 +105,8 @@ async def health_check():
     return {
         "status": "healthy",
         "version": "1.0.0",
-        "api_available": bool(api_key)
+        "api_available": bool(api_key),
+        "has_api_key": bool(api_key)  # 前端期望的字段名
     }
 
 
