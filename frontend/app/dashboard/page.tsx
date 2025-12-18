@@ -100,7 +100,12 @@ export default function Dashboard() {
 
       if (!isArray) {
         console.error('[upload] Expected conversations.json array, got:', jsonData && typeof jsonData === 'object' ? Object.keys(jsonData) : typeof jsonData);
-        toast.error('Please upload the extracted conversations.json (must be a JSON array).');
+        const fileName = file?.name?.toLowerCase() || '';
+        if (fileName.includes('group_chats') || fileName.includes('shopping') || fileName.includes('user')) {
+          toast.error(`❌ Wrong file: "${file.name}"\n\n✅ Please upload "conversations.json" from your ChatGPT export.`);
+        } else {
+          toast.error('Please upload the extracted conversations.json (must be a JSON array).');
+        }
         return;
       }
 
