@@ -132,16 +132,16 @@ async def evaluate_quality(
     """
     try:
         # 检查 API Key
-        api_key = os.getenv("OPENAI_API_KEY") or os.getenv("CHATAIAPI_KEY")
+        api_key = os.getenv("OPENAI_API_KEY") or os.getenv("CHATAIAPI_KEY") or os.getenv("CHATAI_API_KEY")
         if not api_key:
             raise HTTPException(
                 status_code=500,
-                detail="未配置 API Key。请在 .env 文件中设置 OPENAI_API_KEY 或 CHATAIAPI_KEY"
+                detail="未配置 API Key。请在 .env 文件中设置 OPENAI_API_KEY、CHATAIAPI_KEY 或 CHATAI_API_KEY"
             )
         
-        # 保存上传的文件
+        # 保存上传的文件（固定文件名为 conversations.json）
         content = await file.read()
-        temp_file = save_temp_file(content, f"conversations_{file.filename}")
+        temp_file = save_temp_file(content, "conversations.json")
         
         # 获取文件所在目录
         data_folder = temp_file.parent
@@ -176,26 +176,26 @@ async def analyze_flow(file: UploadFile = File(...)):
     """
     分析对话流程
     
-    分析对话的发展过程，识别高价值问题、低价值问题、话题转移等
+    识别对话模式、问题类型分布、对话长度趋势等
     
     参数:
     - file: conversations.json 文件
     
     返回:
-    - 对话流程分析结果，包括问题分类、话题转移点、流程摘要等
+    - 流程分析结果包括问题类型分布、对话长度统计等
     """
     try:
         # 检查 API Key
-        api_key = os.getenv("OPENAI_API_KEY") or os.getenv("CHATAIAPI_KEY")
+        api_key = os.getenv("OPENAI_API_KEY") or os.getenv("CHATAIAPI_KEY") or os.getenv("CHATAI_API_KEY")
         if not api_key:
             raise HTTPException(
                 status_code=500,
-                detail="未配置 API Key。请在 .env 文件中设置 OPENAI_API_KEY 或 CHATAIAPI_KEY"
+                detail="未配置 API Key。请在 .env 文件中设置 OPENAI_API_KEY、CHATAIAPI_KEY 或 CHATAI_API_KEY"
             )
         
-        # 保存上传的文件
+        # 保存上传的文件（固定文件名为 conversations.json）
         content = await file.read()
-        temp_file = save_temp_file(content, f"conversations_{file.filename}")
+        temp_file = save_temp_file(content, "conversations.json")
         
         # 解析数据
         conversations_data = parse_conversations_data(temp_file)
