@@ -1,9 +1,33 @@
-# 添加到 .gitignore
-.env
-*.pyc
+# Python
 __pycache__/
-venv/
+*.py[cod]
+*.class
+*.so
+.Python
 .venv/
-evaluation_results/
+venv/
+
+# Environment
+.env
+.env.local
+
+# Temporary
+backend/temp/
+temp/
+*.tmp
+
+# Results
+evaluation_results/*.json
+evaluation_results/*.html
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# DeepEval
+.deepeval/
+
+# Logs
 *.log
-.DS_Store
