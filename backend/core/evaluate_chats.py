@@ -27,8 +27,8 @@ from core.data_loader import ChatDataLoader
 from core.custom_llm import ChatAIAPIModel, create_deepseek_chat
 
 
-# 加载环境变量
-load_dotenv()
+# 加载环境变量（强制覆盖已有环境变量，确保使用 .env 最新配置）
+load_dotenv(override=True)
 
 
 class ChatQualityEvaluator:
@@ -37,7 +37,7 @@ class ChatQualityEvaluator:
     def __init__(
         self,
         data_folder: str,
-        model: str = "gpt-4o-mini",
+        model: str = "deepseek-chat",
         use_custom_api: bool = True
     ):
         """
@@ -45,7 +45,7 @@ class ChatQualityEvaluator:
         
         Args:
             data_folder: 聊天数据文件夹路径
-            model: 用于评估的模型，默认 gpt-4o-mini
+            model: 用于评估的模型，默认 deepseek-chat（性价比高，稳定）
             use_custom_api: 是否使用 ChatAIAPI (推荐)
                            True - 使用你购买的转发 API
                            False - 使用原生 OpenAI API

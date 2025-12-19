@@ -20,8 +20,8 @@ from core.custom_llm import ChatAIAPIModel, create_deepseek_chat
 from core.evaluate_chats import ChatQualityEvaluator
 from core.conversation_flow_analyzer import ConversationFlowAnalyzer
 
-# 加载环境变量
-load_dotenv()
+# 加载环境变量（强制使用 .env 覆盖进程环境，避免旧值残留）
+load_dotenv(override=True)
 
 app = FastAPI(
     title="ConveVisAna API",
@@ -115,7 +115,7 @@ async def health_check():
 async def evaluate_quality(
     file: UploadFile = File(...),
     max_qa_pairs: int = 3,
-    model: str = "gpt-4o-mini"
+    model: str = "deepseek-chat"
 ):
     """
     评估对话质量
@@ -207,8 +207,8 @@ async def analyze_flow(file: UploadFile = File(...)):
                               if n.get('message')])
         )
         
-        # 创建 LLM 模型
-        model = create_deepseek_chat()
+        # 创建 LLM 模型（传入 API Key）
+        model = create_deepseek_chat(api_key)
         
         # 创建分析器
         analyzer = ConversationFlowAnalyzer(model)

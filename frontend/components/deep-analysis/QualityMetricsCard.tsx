@@ -221,31 +221,43 @@ export default function QualityMetricsCard({ data }: QualityMetricsCardProps) {
           })}
         </div>
 
-        {/* 详细建议 */}
+        {/* 详细建议（防御性处理缺失/失败的指标） */}
         <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
           <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">
             💡 改进建议
           </h3>
-          <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1 list-disc list-inside">
-            {!metrics.relevancy.passed && (
-              <li>提高回答与问题的相关性，确保直接回应用户需求</li>
-            )}
-            {!metrics.helpfulness.passed && (
-              <li>提供更具操作性和实用价值的建议</li>
-            )}
-            {!metrics.coherence.passed && (
-              <li>增强回答的逻辑性和结构性</li>
-            )}
-            {!metrics.toxicity.passed && (
-              <li>避免使用可能冒犯或伤害用户的语言</li>
-            )}
-            {!metrics.bias.passed && (
-              <li>保持中立客观，避免歧视性或偏见性表达</li>
-            )}
-            {Object.values(metrics).every(m => m.passed) && (
-              <li>当前质量表现优秀，继续保持！</li>
-            )}
-          </ul>
+          {(() => {
+            const safeMetrics = metrics || {} as any;
+            const isPassed = (m: any) => m?.passed ?? false;
+            const anyMetric = Object.keys(safeMetrics).length > 0;
+            const allPassed = anyMetric && Object.values(safeMetrics).every((m: any) => m?.passed === true);
+
+            return (
+              <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1 list-disc list-inside">
+                {!isPassed(safeMetrics.relevancy) && (
+                  <li>提高回答与问题的相关性，确保直接回应用户需求</li>
+                )}
+                {!isPassed(safeMetrics.helpfulness) && (
+                  <li>提供更具操作性和实用价值的建议</li>
+                )}
+                {!isPassed(safeMetrics.coherence) && (
+                  <li>增强回答的逻辑性和结构性</li>
+                )}
+                {!isPassed(safeMetrics.toxicity) && (
+                  <li>避免使用可能冒犯或伤害用户的语言</li>
+                )}
+                {!isPassed(safeMetrics.bias) && (
+                  <li>保持中立客观，避免歧视性或偏见性表达</li>
+                )}
+                {anyMetric && allPassed && (
+                  <li>当前质量表现优秀，继续保持！</li>
+                )}
+                {!anyMetric && (
+                  <li>尚未获取有效指标，请稍后重试或更换模型。</li>
+                )}
+              </ul>
+            );
+          })()}
         </div>
       </div>
     </GlassCard>
