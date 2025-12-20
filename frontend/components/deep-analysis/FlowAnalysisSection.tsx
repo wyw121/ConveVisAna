@@ -30,17 +30,44 @@ interface FlowAnalysisSectionProps {
 export default function FlowAnalysisSection({ data }: FlowAnalysisSectionProps) {
   const { summary, turns, cached } = data;
 
+  // 安全数据与默认值
+  const safeTurns = Array.isArray(turns) ? turns : [];
+  const computedAvgQuestionLength = safeTurns.length
+    ? safeTurns.reduce((sum, t) => sum + (t.question?.length || 0), 0) / safeTurns.length
+    : 0;
+  const computedAvgResponseLength = safeTurns.length
+    ? safeTurns.reduce((sum, t) => sum + (t.answer?.length || 0), 0) / safeTurns.length
+    : 0;
+  const computedQuestionTypeCounts = safeTurns.reduce<Record<string, number>>((acc, t) => {
+    const key = t?.question_type || 'other';
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+
+  const safeSummary = {
+    total_turns: Number.isFinite(summary?.total_turns as number)
+      ? (summary!.total_turns as number)
+      : safeTurns.length,
+    avg_question_length: Number.isFinite(summary?.avg_question_length as number)
+      ? (summary!.avg_question_length as number)
+      : computedAvgQuestionLength,
+    avg_response_length: Number.isFinite(summary?.avg_response_length as number)
+      ? (summary!.avg_response_length as number)
+      : computedAvgResponseLength,
+    question_type_counts: (summary?.question_type_counts as Record<string, number>) || computedQuestionTypeCounts,
+  };
+
   // 问题类型饼图数据
-  const questionTypeData = Object.entries(summary.question_type_counts).map(([type, count]) => ({
+  const questionTypeData = Object.entries(safeSummary.question_type_counts).map(([type, count]) => ({
     name: getQuestionTypeLabel(type),
-    value: count,
+    value: Number(count) || 0,
   }));
 
   // 问题类型颜色
   const COLORS = ['#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#ef4444'];
 
   // 对话轮次时间线数据
-  const timelineData = turns.map((turn, index) => ({
+  const timelineData = safeTurns.map((turn, index) => ({
     turn: index + 1,
     questionLength: turn.question?.length || 0,
     responseLength: turn.answer?.length || 0,
@@ -69,7 +96,8 @@ export default function FlowAnalysisSection({ data }: FlowAnalysisSectionProps) 
               对话流程分析
             </h2>
             <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
-              <span>共 {summary.total_turns} 轮对话</span>
+              <span>共 {safeSummary.total_turns} 轮对话</span>
+              {/* 缓存标记 */}
               {cached && (
                 <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-xs">
                   已缓存
@@ -89,7 +117,7 @@ export default function FlowAnalysisSection({ data }: FlowAnalysisSectionProps) 
               </h3>
             </div>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {summary.total_turns}
+              {safeSummary.total_turns}
             </p>
           </div>
 
@@ -101,7 +129,7 @@ export default function FlowAnalysisSection({ data }: FlowAnalysisSectionProps) 
               </h3>
             </div>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {summary.avg_question_length.toFixed(0)}
+              {Number(safeSummary.avg_question_length).toFixed(0)}
             </p>
           </div>
 
@@ -113,7 +141,7 @@ export default function FlowAnalysisSection({ data }: FlowAnalysisSectionProps) 
               </h3>
             </div>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {summary.avg_response_length.toFixed(0)}
+              {Number(safeSummary.avg_response_length).toFixed(0)}
             </p>
           </div>
 
@@ -125,7 +153,7 @@ export default function FlowAnalysisSection({ data }: FlowAnalysisSectionProps) 
               </h3>
             </div>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {Object.keys(summary.question_type_counts).length}
+              {Object.keys(safeSummary.question_type_counts || {}).length}
             </p>
           </div>
         </div>
@@ -230,14 +258,14 @@ export default function FlowAnalysisSection({ data }: FlowAnalysisSectionProps) 
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {turns.slice(0, 10).map((turn, index) => (
+                {safeTurns.slice(0, 10).map((turn, index) => (
                   <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                       {index + 1}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded text-xs">
-                        {getQuestionTypeLabel(turn.question_type)}
+                        {getQuestionTypeLabel(turn.question_type || 'other')}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-white max-w-md truncate">
@@ -251,9 +279,9 @@ export default function FlowAnalysisSection({ data }: FlowAnalysisSectionProps) 
               </tbody>
             </table>
           </div>
-          {turns.length > 10 && (
+          {safeTurns.length > 10 && (
             <div className="px-6 py-3 bg-gray-50 dark:bg-gray-800 text-center text-sm text-gray-500 dark:text-gray-400">
-              显示前 10 条，共 {turns.length} 条对话记录
+              显示前 10 条，共 {safeTurns.length} 条对话记录
             </div>
           )}
         </div>
@@ -265,19 +293,19 @@ export default function FlowAnalysisSection({ data }: FlowAnalysisSectionProps) 
           </h3>
           <ul className="text-sm text-green-700 dark:text-green-300 space-y-1 list-disc list-inside">
             <li>
-              对话共 {summary.total_turns} 轮，
-              {summary.avg_question_length > 100 
+              对话共 {safeSummary.total_turns} 轮，
+              {Number(safeSummary.avg_question_length) > 100 
                 ? '用户问题较详细，表明需求明确' 
                 : '用户问题较简洁，可能需要引导'}
             </li>
             <li>
-              平均回复长度 {summary.avg_response_length.toFixed(0)} 字符，
-              {summary.avg_response_length > 200 
+              平均回复长度 {Number(safeSummary.avg_response_length).toFixed(0)} 字符，
+              {Number(safeSummary.avg_response_length) > 200 
                 ? '回复较详尽' 
                 : '回复相对简洁'}
             </li>
             <li>
-              主要问题类型：{Object.entries(summary.question_type_counts)
+              主要问题类型：{Object.entries(safeSummary.question_type_counts || {})
                 .sort(([, a], [, b]) => (b as number) - (a as number))
                 .slice(0, 2)
                 .map(([type]) => getQuestionTypeLabel(type))

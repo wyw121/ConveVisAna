@@ -239,18 +239,66 @@ async def analyze_flow(file: UploadFile = File(...)):
                         "answer": assistant_msg.content
                     })
         
-        # 执行分析
+        # 执行分析（原始结果）
         result = analyzer.analyze_conversation_flow(
             turns,
             conversation_title=conv.title
         )
+
+        # ========== 适配前端所需结构 ==========
+        # 构造带 question_type 的前端 turns
+        turn_analysis = result.get('turn_analysis', [])
+        frontend_turns = []
+        for i, t in enumerate(turns):
+            qtype = 'other'
+            if i < len(turn_analysis):
+                qtype = turn_analysis[i].get('question_type', 'other') or 'other'
+            frontend_turns.append({
+                "question": t.get('question', ''),
+                "answer": t.get('answer', ''),
+                "question_type": qtype,
+                "turn_number": i + 1
+            })
+
+        # 统计与均值
+        total_turns = len(frontend_turns)
+        avg_question_length = (
+            sum(len(t.get('question', '') or '') for t in frontend_turns) / total_turns
+            if total_turns > 0 else 0
+        )
+        avg_response_length = (
+            sum(len(t.get('answer', '') or '') for t in frontend_turns) / total_turns
+            if total_turns > 0 else 0
+        )
+        question_type_counts: Dict[str, int] = {}
+        for t in frontend_turns:
+            qt = t.get('question_type') or 'other'
+            question_type_counts[qt] = question_type_counts.get(qt, 0) + 1
+
+        frontend_data = {
+            "conversation_id": None,
+            "total_turns": total_turns,
+            "turns": frontend_turns,
+            "summary": {
+                "question_type_counts": question_type_counts,
+                "avg_question_length": avg_question_length,
+                "avg_response_length": avg_response_length,
+                "total_turns": total_turns,
+            },
+            "cached": False,
+            # 附带原始结果，便于调试（前端无需依赖）
+            "_raw": {
+                "flow_summary": result.get('flow_summary', {}),
+                "turn_analysis": turn_analysis,
+            }
+        }
         
         # 清理临时文件
         temp_file.unlink()
         
         return JSONResponse(content={
             "success": True,
-            "data": result,
+            "data": frontend_data,
             "message": f"成功分析对话流程，包含 {len(turns)} 个回合"
         })
         

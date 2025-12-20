@@ -73,7 +73,12 @@ export class ConveVisAnaClient {
         throw new Error(errorDetail.detail || errorDetail.error || '请求失败');
       }
 
-      return response.json();
+      const payload = await response.json();
+      // 兼容后端统一包装 { success, data, message }
+      if (payload && typeof payload === 'object' && 'success' in payload && 'data' in payload) {
+        return (payload.data as T);
+      }
+      return payload as T;
     } catch (error) {
       // 网络错误或其他异常
       if (error instanceof Error) {
