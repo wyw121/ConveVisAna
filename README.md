@@ -10,59 +10,24 @@
 
 ---
 
-## 📌 项目概述与理论复现
+## 📌 项目概述
 
-### 核心目标
-本项目基于论文 **StuGPTViz: A Visual Analytics Approach to Understand Student-ChatGPT Interactions** 的核心思想，复现并实现了以下理论框架：
+本项目基于论文 **StuGPTViz: A Visual Analytics Approach to Understand Student-ChatGPT Interactions**，复现并实现了其核心理论框架。
 
-### 🎯 论文理论实现
+### 🎯 四大核心功能
 
-#### 1. **对话流程分析（Conversation Flow Analysis）**
-- **理论来源**：StuGPTViz 论文中的对话交互模式识别
-- **实现方法**：
-  - 自动识别问题类型（澄清性、深入性、情感性等）
-  - 统计对话轮次、消息长度、话题转移模式
-  - 生成问题类型分布 (question_type_counts)
-- **技术支持**：基于 Convelyze 可视化框架 + 自研分析引擎
+1. **对话流程分析**：自动识别问题类型、统计对话模式、生成问题分布
+2. **布鲁姆认知编码**：基于 Bloom's Taxonomy 的 6 层级认知分类（记忆→理解→应用→分析→评估→创造）
+3. **信息增益评估**：基于 KL Divergence 的信息论计算，公式：IG = DKL(P∥Q) × R × C
+4. **对话质量评估**：基于 DeepEval 框架的多维度质量评分（相关性、毒性、偏见、幻觉）
 
-#### 2. **布鲁姆认知层级编码（Bloom's Taxonomy Mapping）**
-- **理论来源**：Bloom's Taxonomy 认知分类理论（6 层级）
-- **实现方法**：
-  - 启发式映射：question_type → Bloom Level
-  - 认知层级：Remember（记忆）→ Understand（理解）→ Apply（应用）→ Analyze（分析）→ Evaluate（评估）→ Create（创造）
-  - 可视化：雷达图展示认知层级分布 + 代表性样例
-- **创新点**：前端实时计算，0 额外 API 开销
+### 🔬 技术实现
+- **理论来源**：StuGPTViz 论文 + Bloom's Taxonomy + KL Divergence + DeepEval
+- **前端框架**：基于 [Convelyze](https://github.com/meetpateltech/convelyze) 扩展
+- **评估模型**：硅基流动 API + Qwen/Qwen2.5-7B-Instruct
+- **计算效率**：布鲁姆编码 <10ms，信息增益 <30ms（纯前端计算）
 
-#### 3. **信息增益评估（Information Gain Estimation）**
-- **理论来源**：KL Divergence (Kullback-Leibler Divergence) 信息论
-- **核心公式**：IG(P, Q) = DKL(P∥Q) × R × C
-  - **P**：当前对话的问题类型分布（实际分布）
-  - **Q**：基线分布（预期分布，可配置）
-  - **R**：相关性因子（Relevancy Score，来自质量评估）
-  - **C**：内容质量因子（1 - Toxicity Score）
-- **意义**：量化对话相对于基线的信息增益，评估学习效果
-- **实现特点**：纯数学计算，<30ms，支持 P vs Q 对比可视化
-
-#### 4. **对话质量评估（Quality Metrics）**
-- **理论来源**：DeepEval 结构化评估框架
-- **评估维度**：
-  - Relevancy（相关性）：回答是否切题
-  - Toxicity（毒性）：内容是否有害
-  - Bias（偏见）：是否存在偏见
-  - Hallucination（幻觉）：是否捏造事实
-- **技术实现**：硅基流动 API + Qwen/Qwen2.5-7B-Instruct 模型
-
-### 🔬 研究贡献
-1. **完整复现论文核心思想**：从对话流分析到认知编码，再到信息增益评估
-2. **算法文档化**：撰写 BLOOM_INFOGAIN_DESIGN、启发式示例文档，公式推导完整
-3. **端到端验证**：提供测试指南 (DASHBOARD_BLOOM_INFOGAIN_TEST)，确保可复现性
-4. **工程化实现**：基于 Convelyze + DeepEval，构建完整的分析与可视化系统
-
-### 📖 参考基础
-- **论文**：StuGPTViz: A Visual Analytics Approach to Understand Student-ChatGPT Interactions
-- **前端框架**：Convelyze (https://github.com/meetpateltech/convelyze)
-- **评估框架**：DeepEval (https://deepeval.com/)
-- **API 服务**：硅基流动 (SiliconFlow)
+📖 **[查看详细理论说明 →](./docs/THEORY_IMPLEMENTATION.md)**
 
 ---
 
@@ -178,50 +143,10 @@ curl -X POST "http://localhost:8000/api/analyze-flow" \
 
 ---
 
-## 🔍 理论方法详解
-
-### 布鲁姆认知层级编码
-- **理论基础**：Bloom's Taxonomy（1956）认知分类体系
-- **6 层级结构**：
-  1. **Remember（记忆）**：回忆事实、概念
-  2. **Understand（理解）**：解释、总结、推理
-  3. **Apply（应用）**：在新情境中使用知识
-  4. **Analyze（分析）**：区分、组织、归因
-  5. **Evaluate（评估）**：批判、检验、判断
-  6. **Create（创造）**：设计、构建、规划
-- **映射策略**：question_type → Bloom Level 启发式规则
-- **应用价值**：评估学习者的认知深度，识别学习模式
-
-### 信息增益计算
-- **理论基础**：KL Divergence（相对熵，信息论核心概念）
-- **核心公式**：
-  ```
-  IG(P, Q) = DKL(P∥Q) × R × C
-  
-  其中：
-  DKL(P∥Q) = Σ P(i) × log(P(i) / Q(i))
-  R = Relevancy Score (0-1)
-  C = 1 - Toxicity Score (0-1)
-  ```
-- **物理意义**：
-  - **DKL**：实际分布 P 偏离基线 Q 的程度（bit）
-  - **R × C**：质量修正因子，过滤低质量对话
-- **应用价值**：量化对话的学习效果，识别高价值交互
-
-### 对话流程分析
-- **分析维度**：
-  - 问题类型分布（澄清、深入、情感等）
-  - 对话轮次与长度统计
-  - 话题转移模式识别
-- **输出结果**：生成 question_type_counts，作为 Bloom 编码和 InfoGain 的输入
-- **技术实现**：LLM 辅助分类 + 规则引擎
-
----
-
-## 📊 实现亮点
+## � 项目特点
 
 1. **论文理论完整复现**：从对话流分析到认知编码、信息增益评估的完整链路
-2. **算法文档化**：详细推导过程、启发式规则、计算示例全部文档化（docs/ 目录）
+2. **算法文档化**：详细推导过程、启发式规则、计算示例（参见 [理论实现详解](./docs/THEORY_IMPLEMENTATION.md)）
 3. **端到端验证**：提供测试数据和验证步骤，确保结果可复现
 4. **工程化落地**：基于 Convelyze + DeepEval 构建完整系统，本地可运行
 
