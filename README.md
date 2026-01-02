@@ -181,8 +181,27 @@ curl -X POST "http://localhost:8000/api/analyze-flow" \
 
 ## 📚 参考与致谢
 
-- 原项目参考：https://github.com/meetpateltech/convelyze
-- 理论基础：Bloom's Taxonomy；KL Divergence / Information Gain；DeepEval 结构化评估思路。
+### 参考项目
+- **Convelyze**：https://github.com/meetpateltech/convelyze  
+  本项目前端基于 Convelyze 进行扩展和改造，保留了其优秀的可视化设计，并集成了 Deep Analysis 功能。
+
+- **DeepEval**：https://deepeval.com/  
+  使用 DeepEval 框架进行对话质量评估，提供结构化的评估指标（Relevancy、Toxicity、Bias 等）。
+
+### 参考论文
+- **StuGPTViz: A Visual Analytics Approach to Understand Student-ChatGPT Interactions**  
+  本项目的理论基础和设计思路参考了该论文，实现了对话流程分析、认知层级编码等核心功能。
+
+### 技术栈
+- **LLM API 服务**：硅基流动 (SiliconFlow)  
+  推荐使用 Qwen/Qwen2.5-7B-Instruct 模型，JSON 结构稳定，评估效果好。
+
+- **理论基础**：Bloom's Taxonomy、KL Divergence / Information Gain
+
+### 项目状态
+- ✅ **开发环境**：本地开发测试
+- ⏳ **部署状态**：暂未部署到生产服务器
+- 📖 **部署指南**：参考 [DEPLOY_GUIDE.md](./DEPLOY_GUIDE.md)（支持 1G 内存 / 40G 硬盘的轻量级部署）
 
 ---
 
