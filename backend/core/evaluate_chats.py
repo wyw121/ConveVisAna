@@ -24,7 +24,13 @@ from deepeval.metrics import (
 from deepeval.test_case import LLMTestCaseParams
 
 from core.data_loader import ChatDataLoader
-from core.custom_llm import ChatAIAPIModel, create_deepseek_chat
+from core.custom_llm import ChatAIAPIModel, create_default_model
+
+# 导入配置中心
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from config.llm_config import LLMConfig, get_api_key, get_model_for_task
 
 
 # 加载环境变量（强制覆盖已有环境变量，确保使用 .env 最新配置）
@@ -37,7 +43,7 @@ class ChatQualityEvaluator:
     def __init__(
         self,
         data_folder: str,
-        model: str = "deepseek-chat",
+        model: str = None,
         use_custom_api: bool = True
     ):
         """
@@ -45,26 +51,26 @@ class ChatQualityEvaluator:
         
         Args:
             data_folder: 聊天数据文件夹路径
-            model: 用于评估的模型，默认 deepseek-chat（性价比高，稳定）
-            use_custom_api: 是否使用 ChatAIAPI (推荐)
-                           True - 使用你购买的转发 API
-                           False - 使用原生 OpenAI API
+            model: 用于评估的模型（默认使用配置中心的评估模型）
+            use_custom_api: 是否使用自定义 API （推荐）
         """
         self.data_folder = data_folder
-        self.model_name = model
+        # 使用配置中心的默认模型
+        self.model_name = model or get_model_for_task("evaluation")
         self.use_custom_api = use_custom_api
         self.loader = ChatDataLoader(data_folder)
         
         # 初始化自定义 LLM (如果使用)
         self.custom_llm = None
         if use_custom_api:
-            api_key = os.getenv('CHATAI_API_KEY')
+            # 使用配置中心获取 API Key
+            api_key = get_api_key()
             if not api_key:
                 raise ValueError(
-                    "使用自定义 API 需要设置 CHATAI_API_KEY 环境变量"
+                    "未配置 API Key，请在 .env 文件中设置 CHATAIAPI_KEY 或 CHATAI_API_KEY"
                 )
-            self.custom_llm = ChatAIAPIModel(api_key=api_key, model=model)
-            print(f"[OK] 使用 ChatAIAPI 转发服务，模型: {model}")
+            self.custom_llm = ChatAIAPIModel(api_key=api_key, model=self.model_name)
+            print(f"[OK] 使用硅基流动免费 API，模型: {self.model_name}")
         else:
             if not os.getenv('OPENAI_API_KEY'):
                 raise ValueError(
@@ -173,9 +179,9 @@ class ChatQualityEvaluator:
         
         # 选择要使用的指标
         if selected_metrics:
-            metrics_to_use = [self.metrics[m] for m in selected_metrics if m in self.metrics]
+            metrics_items = [(m, self.metrics[m]) for m in selected_metrics if m in self.metrics]
         else:
-            metrics_to_use = list(self.metrics.values())
+            metrics_items = list(self.metrics.items())
         
         # 评估每个问答对
         results = []
@@ -198,10 +204,14 @@ class ChatQualityEvaluator:
                 'scores': {}
             }
             
-            for metric in metrics_to_use:
+            for key, metric in metrics_items:
                 try:
                     metric.measure(test_case)
-                    metric_name = getattr(metric, '__name__', type(metric).__name__)
+                    # 使用字典键名作为指标名称，确保与 summary 生成逻辑一致
+                    metric_name = key
+                    # 获取显示名称用于日志
+                    display_name = getattr(metric, '__name__', type(metric).__name__)
+                    
                     qa_result['scores'][metric_name] = {
                         'score': metric.score,
                         'reason': metric.reason if hasattr(metric, 'reason') else None,
@@ -209,10 +219,11 @@ class ChatQualityEvaluator:
                     }
                     passed_str = 'PASS' if qa_result['scores'][metric_name]['passed'] else 'FAIL'
                     passed_mark = f"[{passed_str}]"
-                    print(f"  {metric_name}: {metric.score:.3f} {passed_mark}")
+                    print(f"  {display_name} ({metric_name}): {metric.score:.3f} {passed_mark}")
                 except Exception as e:
-                    metric_name = getattr(metric, '__name__', type(metric).__name__)
-                    print(f"  {metric_name}: 评估失败 - {str(e)[:100]}")
+                    metric_name = key
+                    display_name = getattr(metric, '__name__', type(metric).__name__)
+                    print(f"  {display_name}: 评估失败 - {str(e)[:100]}")
                     qa_result['scores'][metric_name] = {
                         'score': None,
                         'error': str(e)
@@ -309,7 +320,7 @@ def main():
     # 创建评估器
     evaluator = ChatQualityEvaluator(
         data_folder,
-        model='deepseek-chat',  # 你的API支持的模型
+        model='claude-3-5-sonnet-20240620',
         use_custom_api=use_custom
     )
     

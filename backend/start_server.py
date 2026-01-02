@@ -14,12 +14,20 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # 检查 API Key
-api_key = os.getenv("OPENAI_API_KEY") or os.getenv("CHATAIAPI_KEY")
+api_key = (
+    os.getenv("API_KEY_OVERRIDE")
+    or os.getenv("OPENAI_API_KEY")
+    or os.getenv("CHATAIAPI_KEY")
+    or os.getenv("CHATAI_API_KEY")
+)
 if not api_key:
     print("⚠️  警告: 未检测到 API Key")
     print("请在 .env 文件中设置以下之一:")
     print("  - OPENAI_API_KEY")
     print("  - CHATAIAPI_KEY")
+    print("  - CHATAI_API_KEY")
+    print("或在终端临时设置:")
+    print("  - API_KEY_OVERRIDE (优先级最高)")
     print()
 
 # 启动服务器

@@ -6,13 +6,14 @@ ConveVisAna Backend Core Package
 __version__ = "1.0.0"
 
 from .data_loader import ChatDataLoader
-from .custom_llm import ChatAIAPIModel, create_deepseek_chat
+from .custom_llm import ChatAIAPIModel, create_claude_sonnet, create_deepseek_chat
 from .evaluate_chats import ChatQualityEvaluator
 from .conversation_flow_analyzer import ConversationFlowAnalyzer
 
 __all__ = [
     "ChatDataLoader",
     "ChatAIAPIModel",
+    "create_claude_sonnet",
     "create_deepseek_chat",
     "ChatQualityEvaluator",
     "ConversationFlowAnalyzer",

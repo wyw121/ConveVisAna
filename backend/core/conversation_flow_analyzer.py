@@ -210,7 +210,7 @@ class ConversationFlowAnalyzer:
 
 def main():
     """演示用法"""
-    from custom_llm import create_deepseek_chat
+    from custom_llm import create_claude_sonnet
     import os
     from dotenv import load_dotenv
     from core.data_loader import ChatDataLoader
@@ -219,7 +219,7 @@ def main():
     
     # 创建模型
     api_key = os.getenv('CHATAI_API_KEY')
-    model = create_deepseek_chat(api_key)
+    model = create_claude_sonnet(api_key)
     
     # 加载对话数据
     data_path = "f6eaf8f0f71aa12e8832082345edd8f0ed475ded4fc40fb0ca9780a596497ada-2025-11-18-01-38-19-c9c652a5f61b4d3f862e60633a9f144a"

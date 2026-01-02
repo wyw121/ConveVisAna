@@ -6,3 +6,5 @@
 export { default as DeepAnalysisPanel } from './DeepAnalysisPanel';
 export { default as QualityMetricsCard } from './QualityMetricsCard';
 export { default as FlowAnalysisSection } from './FlowAnalysisSection';
+export { default as BloomTaxonomyCard } from './BloomTaxonomyCard';
+export { default as InfoGainCard } from './InfoGainCard';

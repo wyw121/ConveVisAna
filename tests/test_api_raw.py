@@ -10,24 +10,16 @@ from dotenv import load_dotenv
 load_dotenv()
 
 api_key = os.getenv('CHATAI_API_KEY')
-base_url = "https://www.chataiapi.com/v1"
+base_url = os.getenv('CHATAI_BASE_URL', "https://www.chataiapi.com/v1")
 
 print("=" * 70)
 print("直接测试 ChatAIAPI (根据你提供的代码示例)")
 print("=" * 70)
 print()
 
-# 尝试不同的模型名称
+# 尝试的模型列表（当前后端统一使用 Claude Sonnet 3.5）
 test_models = [
-    # 你原始代码中的示例
     "claude-3-5-sonnet-20240620",
-    
-    # 其他可能的名称
-    "gpt-4o-mini",
-    "gpt-4",
-    "gpt-3.5-turbo",
-    "gemini-pro",
-    "deepseek-chat",
 ]
 
 for model_name in test_models:

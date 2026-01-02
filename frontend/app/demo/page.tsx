@@ -29,6 +29,8 @@ import UserSystemHintsCard from '@/components/dashboard/UserSystemHintsCard';
 import { PlanSelector } from '@/components/dashboard/PlanSelector';
 import AICodeStatsCard from '@/components/dashboard/CodeBlockCount';
 import { CanvasStats } from '@/components/dashboard/CanvasStats';
+import { QualityMetricsCard, FlowAnalysisSection, BloomTaxonomyCard, InfoGainCard } from '@/components/deep-analysis';
+import type { QualityEvaluationResult, FlowAnalysisResult } from '@/types/deepAnalysis';
 
 interface TokenUsage {
   userTokens: number;
@@ -44,7 +46,7 @@ interface TokenUsageData {
 }
 
 export default function Dashboard() {
-  const [mode, setMode] = useState('normal');
+  const [mode, setMode] = useState<'normal' | 'advanced' | 'token' | 'deep'>('normal');
   const [timeUnit, setTimeUnit] = useState('D');
 
   const dashboardData = {
@@ -476,6 +478,82 @@ export default function Dashboard() {
   const [selectedYear, setSelectedYear] = useState(2024);
 
   const [selectedPlan, setSelectedPlan] = useState('free');
+
+  // ===== Deep Analysis Demo Data =====
+  const qualityDemoData: QualityEvaluationResult = {
+    pairs_evaluated: 23,
+    average_score: 0.874,
+    metrics: {
+      relevancy: { score: 0.91, threshold: 0.7, passed: true, reason: '回答紧扣用户问题，引用内容准确' },
+      helpfulness: { score: 0.86, threshold: 0.7, passed: true, reason: '提供清晰步骤与替代方案，包含注意事项' },
+      coherence: { score: 0.89, threshold: 0.7, passed: true, reason: '结构化良好，逻辑顺畅，过渡自然' },
+      toxicity: { score: 0.028, threshold: 0.3, passed: true },
+      bias: { score: 0.044, threshold: 0.3, passed: true },
+    },
+    details: [
+      {
+        question: '如何用 Next.js + Tailwind 快速搭建一个仪表盘？',
+        answer: '使用 create-next-app 初始化项目，配置 Tailwind；按模块拆分卡片与图表组件，最后在布局中组合，并统一主题变量。',
+        metrics: {
+          relevancy: { score: 0.93, threshold: 0.7, passed: true },
+          helpfulness: { score: 0.88, threshold: 0.7, passed: true },
+          coherence: { score: 0.9, threshold: 0.7, passed: true },
+        },
+        overall_score: 0.903,
+      },
+      {
+        question: '如何根据 token 用量估算费用？',
+        answer: '统计输入/输出 token；按模型单价分别计费，汇总到月度并对趋势做平滑处理，输出折线与柱状对比。',
+        metrics: {
+          relevancy: { score: 0.9, threshold: 0.7, passed: true },
+          helpfulness: { score: 0.85, threshold: 0.7, passed: true },
+          coherence: { score: 0.87, threshold: 0.7, passed: true },
+        },
+        overall_score: 0.874,
+      },
+    ],
+    cached: false,
+  };
+
+  const flowDemoData: FlowAnalysisResult = {
+    conversation_id: 'demo-conv-001',
+    // 将总轮次与类别分布对齐（非均匀）
+    total_turns: 89,
+    turns: [
+      { question: '我想做一个数据看板，如何开始？', answer: '先确定指标与数据来源，选择 Next.js + 图表库。', question_type: 'planning', turn_number: 1 },
+      { question: '用哪种图表库更合适？', answer: '可选 Recharts / Chart.js，结合交互需求与主题风格。', question_type: 'tooling', turn_number: 2 },
+      { question: '如何组织组件结构？', answer: '将卡片拆成展示组件与容器组件，提升复用性。', question_type: 'architecture', turn_number: 3 },
+      { question: '样式该如何统一？', answer: '用 Tailwind 变量与主题 Provider，封装通用样式。', question_type: 'styling', turn_number: 4 },
+      { question: '我需要上传 conversations.json 做分析', answer: '在界面提供拖拽上传，后端解析并返回指标。', question_type: 'feature', turn_number: 5 },
+      { question: '质量评估包括哪些维度？', answer: '相关性、有用性、连贯性、毒性、偏见。', question_type: 'qa', turn_number: 6 },
+      { question: '流程分析能看到什么？', answer: '问题类型分布、平均长度、轮次趋势与模式。', question_type: 'insight', turn_number: 7 },
+      { question: '费用如何估算？', answer: '按模型单价对输入/输出 token 分别计费，按月统计。', question_type: 'cost', turn_number: 8 },
+      { question: '如何导出报告？', answer: '后端生成 HTML 报告，前端提供下载。', question_type: 'report', turn_number: 9 },
+      { question: '有没有改进建议？', answer: '增加缓存与增量分析，优化大文件体验。', question_type: 'suggestion', turn_number: 10 },
+    ],
+    summary: {
+      // 非均匀分布，填满十个类别
+      question_type_counts: {
+        planning: 12,
+        tooling: 9,
+        architecture: 14,
+        styling: 7,
+        feature: 11,
+        qa: 8,
+        insight: 10,
+        cost: 6,
+        report: 5,
+        suggestion: 7,
+      },
+      avg_question_length: 42.0,
+      avg_response_length: 88.0,
+      conversation_flow: 'coherent',
+      total_turns: 89,
+    },
+    cached: false,
+  };
+
+  // 保持原始 10 条示例对话，避免过度合成
   
   return (
     <>
@@ -513,6 +591,14 @@ export default function Dashboard() {
                   onClick={() => setMode('token')}
                 >
                   Tokens
+                </Button>
+                <Button
+                  variant={mode === 'deep' ? 'secondary' : 'ghost'}
+                  className={`rounded-full px-3 py-1 ${mode === 'deep' ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white' : 'text-gray-800 dark:text-white'}`}
+                  onClick={() => setMode('deep')}
+                >
+                  <Brain className="w-4 h-4 mr-1" />
+                  Deep Analysis
                 </Button>
               </div>
             </div>
@@ -759,6 +845,17 @@ export default function Dashboard() {
                 </div>
               </>
             )}
+
+          {mode === 'deep' && (
+            <div className="mt-8 space-y-6">
+              <QualityMetricsCard data={qualityDemoData} />
+              <FlowAnalysisSection data={flowDemoData} />
+              {/* 布鲁姆认知分类编码模块 */}
+              <BloomTaxonomyCard flow={flowDemoData} />
+              {/* 信息增益公式推算模块 IG(P∥Q)=DKL(P∥Q)×R×C */}
+              <InfoGainCard flow={flowDemoData} quality={qualityDemoData} />
+            </div>
+          )}
         </div>
       </div>
     </>

@@ -16,9 +16,12 @@ from dotenv import load_dotenv
 import sys
 sys.path.append(str(Path(__file__).parent.parent))
 from core.data_loader import ChatDataLoader
-from core.custom_llm import ChatAIAPIModel, create_deepseek_chat
+from core.custom_llm import ChatAIAPIModel, create_default_model
 from core.evaluate_chats import ChatQualityEvaluator
 from core.conversation_flow_analyzer import ConversationFlowAnalyzer
+
+# 导入配置中心
+from config.llm_config import LLMConfig, get_api_key, get_model_for_task
 
 # 加载环境变量（强制使用 .env 覆盖进程环境，避免旧值残留）
 load_dotenv(override=True)
@@ -52,7 +55,7 @@ class EvaluationRequest(BaseModel):
     conversation_id: Optional[str] = None
     max_qa_pairs: int = 3
     selected_metrics: Optional[List[str]] = None
-    model: str = "gpt-4o-mini"
+    model: str = "claude-3-5-sonnet-20240620"
 
 
 class FlowAnalysisRequest(BaseModel):
@@ -102,12 +105,11 @@ async def root():
 @app.get("/api/health", response_model=HealthResponse)
 async def health_check():
     """健康检查"""
-    api_key = os.getenv("OPENAI_API_KEY") or os.getenv("CHATAIAPI_KEY")
     return {
         "status": "healthy",
         "version": "1.0.0",
-        "api_available": bool(api_key),
-        "has_api_key": bool(api_key)  # 前端期望的字段名
+        "api_available": LLMConfig.is_api_available(),
+        "has_api_key": LLMConfig.is_api_available()
     }
 
 
@@ -115,7 +117,7 @@ async def health_check():
 async def evaluate_quality(
     file: UploadFile = File(...),
     max_qa_pairs: int = 3,
-    model: str = "deepseek-chat"
+    model: str = None  # 默认使用配置中心的评估模型
 ):
     """
     评估对话质量
@@ -125,18 +127,18 @@ async def evaluate_quality(
     参数:
     - file: conversations.json 文件
     - max_qa_pairs: 评估的问答对数量（默认3，防止成本过高）
-    - model: 使用的 LLM 模型
+    - model: 使用的 LLM 模型（默认使用硅基流动免费模型）
     
     返回:
     - 评估结果包括相关性、有用性、连贯性、同理心、毒性、偏见等指标
     """
     try:
-        # 检查 API Key
-        api_key = os.getenv("OPENAI_API_KEY") or os.getenv("CHATAIAPI_KEY") or os.getenv("CHATAI_API_KEY")
+        # 使用配置中心检查 API Key
+        api_key = get_api_key()
         if not api_key:
             raise HTTPException(
                 status_code=500,
-                detail="未配置 API Key。请在 .env 文件中设置 OPENAI_API_KEY、CHATAIAPI_KEY 或 CHATAI_API_KEY"
+                detail="未配置 API Key。请在 .env 文件中设置 CHATAIAPI_KEY 或 CHATAI_API_KEY"
             )
         
         # 保存上传的文件（固定文件名为 conversations.json）
@@ -145,6 +147,9 @@ async def evaluate_quality(
         
         # 获取文件所在目录
         data_folder = temp_file.parent
+        
+        # 使用配置的默认模型（如果未指定）
+        model = model or get_model_for_task("evaluation")
         
         # 创建评估器
         evaluator = ChatQualityEvaluator(
@@ -157,13 +162,63 @@ async def evaluate_quality(
         results = evaluator.evaluate_conversation(
             max_qa_pairs=max_qa_pairs
         )
-        
+
+        # === 适配前端预期的数据结构 (QualityEvaluationResult) ===
+        summary_metrics = results.get('summary', {}).get('metrics', {})
+
+        def metric_entry(name: str):
+            m = summary_metrics.get(name)
+            if not m:
+                return None
+            score = m.get('average_score', 0)
+            threshold = getattr(evaluator.metrics.get(name), 'threshold', 0)
+            # 对毒性/偏见类指标采用“越低越好”的通过逻辑
+            if name in ['toxicity', 'bias']:
+                passed = score <= threshold if threshold else True
+            else:
+                passed = score >= threshold if threshold else True
+            return {
+                'score': score,
+                'threshold': threshold,
+                'passed': passed,
+            }
+
+        metrics_payload = {
+            'relevancy': metric_entry('relevancy'),
+            'helpfulness': metric_entry('helpfulness'),
+            'coherence': metric_entry('coherence'),
+            'toxicity': metric_entry('toxicity'),
+            'bias': metric_entry('bias'),
+        }
+
+        # 前端用于可视化的整体得分（保持与前端计算方式一致）
+        def safe_score(entry, inverse=False):
+            if not entry or entry.get('score') is None:
+                return 0
+            return (1 - entry['score']) if inverse else entry['score']
+
+        average_score = (
+            safe_score(metrics_payload['relevancy']) +
+            safe_score(metrics_payload['helpfulness']) +
+            safe_score(metrics_payload['coherence']) +
+            safe_score(metrics_payload['toxicity'], inverse=True) +
+            safe_score(metrics_payload['bias'], inverse=True)
+        ) / 5
+
+        response_payload = {
+            'pairs_evaluated': results.get('total_qa_pairs', 0),
+            'metrics': metrics_payload,
+            'average_score': average_score,
+            # 兼容字段：保留原始结果以便调试或下载
+            'raw': results,
+        }
+
         # 清理临时文件
         temp_file.unlink()
-        
+
         return JSONResponse(content={
             "success": True,
-            "data": results,
+            "data": response_payload,
             "message": f"成功评估 {max_qa_pairs} 个问答对"
         })
         
@@ -172,7 +227,10 @@ async def evaluate_quality(
 
 
 @app.post("/api/analyze-flow")
-async def analyze_flow(file: UploadFile = File(...)):
+async def analyze_flow(
+    file: UploadFile = File(...),
+    model: str = None  # 支持指定模型，默认使用配置中心的流程分析模型
+):
     """
     分析对话流程
     
@@ -180,17 +238,18 @@ async def analyze_flow(file: UploadFile = File(...)):
     
     参数:
     - file: conversations.json 文件
+    - model: 使用的 LLM 模型（默认使用硅基流动免费模型）
     
     返回:
     - 流程分析结果包括问题类型分布、对话长度统计等
     """
     try:
-        # 检查 API Key
-        api_key = os.getenv("OPENAI_API_KEY") or os.getenv("CHATAIAPI_KEY") or os.getenv("CHATAI_API_KEY")
+        # 使用配置中心检查 API Key
+        api_key = get_api_key()
         if not api_key:
             raise HTTPException(
                 status_code=500,
-                detail="未配置 API Key。请在 .env 文件中设置 OPENAI_API_KEY、CHATAIAPI_KEY 或 CHATAI_API_KEY"
+                detail="未配置 API Key。请在 .env 文件中设置 CHATAIAPI_KEY 或 CHATAI_API_KEY"
             )
         
         # 保存上传的文件（固定文件名为 conversations.json）
@@ -207,11 +266,14 @@ async def analyze_flow(file: UploadFile = File(...)):
                               if n.get('message')])
         )
         
-        # 创建 LLM 模型（传入 API Key）
-        model = create_deepseek_chat(api_key)
+        # 使用配置的默认模型（如果未指定）
+        model_name = model or get_model_for_task("flow_analysis")
+        
+        # 创建 LLM 模型
+        llm_model = ChatAIAPIModel(api_key=api_key, model=model_name)
         
         # 创建分析器
-        analyzer = ConversationFlowAnalyzer(model)
+        analyzer = ConversationFlowAnalyzer(llm_model)
         
         # 提取对话回合
         # 这里需要实现提取逻辑，简化版：
