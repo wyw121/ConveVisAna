@@ -1,5 +1,5 @@
 import React from 'react'
-import { ArrowRight, Shield, Sun, BarChart2, BadgeCheck, Brain, Sparkles, TrendingUp } from 'lucide-react'
+import { ArrowRight, Shield, Sun, BarChart2, BadgeCheck, Brain, Sparkles, TrendingUp, Github } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ModeToggle } from '@/components/ModeToggle'
 import Background from '@/components/ui/background'
