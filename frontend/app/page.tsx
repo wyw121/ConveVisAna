@@ -1,5 +1,5 @@
 import React from 'react'
-import { ArrowRight, Shield, Sun, BarChart2, Github, Twitter, BadgeCheck, Brain, Sparkles, TrendingUp } from 'lucide-react'
+import { ArrowRight, Shield, Sun, BarChart2, BadgeCheck, Brain, Sparkles, TrendingUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ModeToggle } from '@/components/ModeToggle'
 import Background from '@/components/ui/background'
@@ -36,7 +36,7 @@ export default function CoolLandingPage() {
         </main>
         
         <footer className="mt-4 p-6 text-center">
-         <div className="flex justify-center items-center space-x-8 mb-8">
+         <div className="flex justify-center items-center space-x-8">
           <AnimatedButton 
             initialText="Cooked in"
             targetText="Let me cook"
@@ -48,14 +48,6 @@ export default function CoolLandingPage() {
             icon={<ClaudeIcon />}
           />
          </div>
-      <div className="flex justify-center space-x-6">
-        <a href="https://github.com/meetpateltech" target="_blank" className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
-          <Github size={20} aria-label="GitHub" />
-        </a>
-        <a href="https://x.com/MeetPatelTech" target="_blank" className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
-          <Twitter size={20} aria-label="Twitter" />
-        </a>
-      </div>
     </footer>
 
       </div>

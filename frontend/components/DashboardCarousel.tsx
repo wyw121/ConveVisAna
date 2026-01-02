@@ -14,23 +14,23 @@ const DashboardCarousel: React.FC = () => {
   
   const dashboardImages: DashboardImage[] = [
     {
-      src: "https://cdn.jsdelivr.net/gh/meetpateltech/convelyze@main/public/dashboard.png",
+      src: "/dashboard.png",
       alt: "Main Dashboard Overview"
     },
     {
-      src: "https://cdn.jsdelivr.net/gh/meetpateltech/convelyze@main/public/advanced-mode.png",
+      src: "/advanced-mode.png",
       alt: "Advanced Mode"
     },
     {
-      src: "https://cdn.jsdelivr.net/gh/meetpateltech/convelyze@main/public/advanced-mode-one.png",
+      src: "/advanced-mode-one.png",
       alt: "Advanced Mode One"
     },
     {
-      src: "https://cdn.jsdelivr.net/gh/meetpateltech/convelyze@main/public/token-graph.png",
+      src: "/token-graph.png",
       alt: "Token Graph Mode"
     },
     {
-      src: "https://cdn.jsdelivr.net/gh/meetpateltech/convelyze@main/public/token-monthly.png",
+      src: "/token-monthly.png",
       alt: "Token Monthly Usage"
     }
   ];
@@ -46,14 +46,16 @@ const DashboardCarousel: React.FC = () => {
       <CarouselContent>
         {dashboardImages.map((image, index) => (
           <CarouselItem key={index}>
-            <Image 
-              src={image.src} 
-              alt={image.alt} 
-              width={1920}
-              height={1080}
-              className="rounded-3xl shadow-2xl object-cover w-full h-full"
-              priority={index === 0} 
-            />
+            <div className="relative w-full" style={{ aspectRatio: '16/9' }}>
+              <Image 
+                src={image.src} 
+                alt={image.alt} 
+                fill
+                sizes="(max-width: 1536px) 100vw, 1536px"
+                className="rounded-3xl shadow-2xl object-cover"
+                priority={index === 0}
+              />
+            </div>
           </CarouselItem>
         ))}
       </CarouselContent>
