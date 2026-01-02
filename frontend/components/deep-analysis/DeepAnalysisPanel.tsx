@@ -12,6 +12,8 @@ import { useDeepAnalysis } from '@/hooks/useDeepAnalysis';
 import { useBackendStatus } from '@/hooks/useBackendStatus';
 import QualityMetricsCard from './QualityMetricsCard';
 import FlowAnalysisSection from './FlowAnalysisSection';
+import BloomTaxonomyCard from './BloomTaxonomyCard';
+import InfoGainCard from './InfoGainCard';
 
 interface DeepAnalysisPanelProps {
   conversationFile: File | null;
@@ -223,6 +225,17 @@ export default function DeepAnalysisPanel({
 
       {flowResult && (
         <FlowAnalysisSection data={flowResult} />
+      )}
+
+      {/* 布鲁姆认知编码和信息增益推算 - 需要同时有质量评估和流程分析结果 */}
+      {qualityResult && flowResult && (
+        <div className="space-y-6">
+          {/* 布鲁姆认知编码 */}
+          <BloomTaxonomyCard flow={flowResult} />
+          
+          {/* 信息增益推算 */}
+          <InfoGainCard flow={flowResult} quality={qualityResult} />
+        </div>
       )}
     </div>
   );
