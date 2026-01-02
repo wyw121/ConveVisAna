@@ -1,5 +1,5 @@
 import React from 'react'
-import { ArrowRight, Shield, Sun, BarChart2, Github, Twitter, BadgeCheck } from 'lucide-react'
+import { ArrowRight, Shield, Sun, BarChart2, Github, Twitter, BadgeCheck, Brain, Sparkles, TrendingUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ModeToggle } from '@/components/ModeToggle'
 import Background from '@/components/ui/background'
@@ -68,15 +68,15 @@ function HeroSection() {
     <section className="text-center mb-16 sm:mb-32 relative">
       <div className="flex flex-col items-center">
         {/* New Feature Badge */}
-        <div className="flex items-center space-x-2 mb-4 bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200 px-4 py-1 rounded-full">
-          <BadgeCheck className="w-5 h-5" />
-          <span className="font-semibold">New Feature: Token Usage & Estimated Cost</span>
+        <div className="flex items-center space-x-2 mb-4 bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-200 px-4 py-2 rounded-full shadow-lg">
+          <Brain className="w-5 h-5 animate-pulse" />
+          <span className="font-semibold">NEW: AI-Powered Deep Analysis</span>
         </div>
         <h1 className="text-4xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-sky-600 mb-6 leading-tight py-2">
-         Your ChatGPT usage, visualized
+         ChatGPT 对话深度分析
         </h1>
         <p className="text-lg sm:text-xl text-gray-700 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
-         See your ChatGPT conversations in a whole new way. Our simple and easy-to-use dashboard shows you how you&apos;re using ChatGPT, so you can get more out of it.
+         不仅仅是可视化，更有 AI 驱动的质量评估、流程分析、布鲁姆认知编码和信息增益推算。让每一次对话都产生价值洞察。
         </p>
         <div className="flex justify-center space-x-4">
           <Link href="/dashboard">
@@ -102,32 +102,44 @@ function FeaturesSection() {
   return (
     <section className="mb-16 sm:mb-32 relative">
       <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-12 text-center">
-        Supercharge Your Chat Analysis
+        强大的对话分析能力
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-12">
+        <FeatureCard 
+          icon={<Brain />}
+          title="AI 质量评估"
+          description="基于 DeepEval 框架，自动评估对话相关性、有用性、连贯性、毒性和偏见等5大指标。"
+          color="from-purple-500 to-violet-500"
+        />
+        <FeatureCard 
+          icon={<TrendingUp />}
+          title="流程分析"
+          description="智能识别问题类型（规划、工具、架构等），分析对话流程模式和复杂度。"
+          color="from-blue-500 to-cyan-500"
+        />
+        <FeatureCard 
+          icon={<Sparkles />}
+          title="布鲁姆认知编码"
+          description="基于布鲁姆分类法，将对话分解为6个认知层级（记忆/理解/应用/分析/评价/创造）。"
+          color="from-pink-500 to-rose-500"
+        />
         <FeatureCard 
           icon={<BarChart2 />}
-          title="Comprehensive Analytics"
-          description="Track conversations, messages, GPT usage, model usage and more with our comprehensive analytics."
-          color="from-pink-500 to-red-500"
+          title="信息增益推算"
+          description="通过 KL 散度计算对话信息增益，评估每次交互带来的实际价值。"
+          color="from-amber-500 to-orange-500"
         />
         <FeatureCard 
           icon={<Shield />}
-          title="Privacy First"
-          description="All data processed client-side for maximum security. Your conversations stay private."
+          title="隐私优先"
+          description="启发式算法在前端计算，0 API 调用成本。质量评估可选后端处理。"
           color="from-green-500 to-teal-500"
         />
         <FeatureCard 
           icon={<Github />}
-          title="Open Source"
-          description="This project is open source, which means you can view, modify, and contribute to the code."
-          color="from-yellow-500 to-orange-500"
-        />
-        <FeatureCard 
-          icon={<Sun />}
-          title="Light & Dark Mode"
-          description="Easy on the eyes, day or night. Seamlessly switch between light and dark themes."
-          color="from-purple-500 to-indigo-500"
+          title="开源项目"
+          description="完全开源，支持本地部署。查看、修改和贡献代码，打造属于你的分析工具。"
+          color="from-indigo-500 to-purple-500"
         />
       </div>
     </section>
@@ -191,25 +203,31 @@ function HowToUseSection() {
   return (
     <section className="mb-16 sm:mb-32 relative">
       <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-12 text-center">
-        Three Simple Steps to Insights
+        简单四步，开启深度分析
       </h2>
       <div className="relative">
         <StepCard 
           number={1}
-          title="Export Your ChatGPT Data"
-          description="Go to chatgpt.com, open Profile -> Settings -> Data controls, and click on 'Export data'."
+          title="导出 ChatGPT 数据"
+          description="访问 chatgpt.com，打开 Profile -> Settings -> Data controls，点击 'Export data'。"
           imageSrc="https://cdn.jsdelivr.net/gh/meetpateltech/convelyze@main/public/step-1.png"
         />
         <StepCard 
           number={2}
-          title="Receive Export Email"
-          description="Wait for an email from OpenAI with your data export. If you're lucky, it will arrive within a few minutes, or you may need to try continuously for the coming few weeks."
+          title="接收导出邮件"
+          description="等待 OpenAI 发送数据导出邮件。运气好的话几分钟内到达，否则可能需要几周时间。"
           imageSrc="https://cdn.jsdelivr.net/gh/meetpateltech/convelyze@main/public/step-2.png"
         />
         <StepCard 
           number={3}
-          title="Upload and Analyze"
-          description="Extract the zip file, then upload conversations.json to our dashboard to see your analysis."
+          title="上传文件到 Dashboard"
+          description="解压 zip 文件，将 conversations.json 上传到 Dashboard 页面查看可视化分析。"
+          imageSrc="https://cdn.jsdelivr.net/gh/meetpateltech/convelyze@main/public/step-3.png"
+        />
+        <StepCard 
+          number={4}
+          title="启动 Deep Analysis"
+          description="切换到 Deep Analysis 模式，运行质量评估和流程分析，自动生成布鲁姆认知编码和信息增益报告。"
           imageSrc="https://cdn.jsdelivr.net/gh/meetpateltech/convelyze@main/public/step-3.png"
         />
       </div>
