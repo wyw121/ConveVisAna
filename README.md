@@ -6,6 +6,8 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com/)
 [![Next.js](https://img.shields.io/badge/Next.js-14-black.svg)](https://nextjs.org/)
 
+![Dashboard Overview](./frontend/public/dashboard.png)
+
 ---
 
 ## 📌 项目亮点与个人贡献
@@ -65,7 +67,30 @@ ConveVisAna/
 
 ---
 
-## 🚀 快速使用指南
+## � 功能展示
+
+### 使用步骤
+
+<div align="center">
+  <img src="./frontend/public/step-1.png" width="30%" alt="Step 1"/>
+  <img src="./frontend/public/step-2.png" width="30%" alt="Step 2"/>
+  <img src="./frontend/public/step-3.png" width="30%" alt="Step 3"/>
+</div>
+
+### Deep Analysis 高级模式
+
+![Advanced Mode](./frontend/public/advanced-mode.png)
+
+### Token 使用统计
+
+<div align="center">
+  <img src="./frontend/public/token-graph.png" width="48%" alt="Token Graph"/>
+  <img src="./frontend/public/token-monthly.png" width="48%" alt="Token Monthly"/>
+</div>
+
+---
+
+## �🚀 快速使用指南
 
 ### 后端（FastAPI）
 ```bash
