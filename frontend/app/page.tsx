@@ -76,7 +76,8 @@ function HeroSection() {
          ChatGPT 对话深度分析
         </h1>
         <p className="text-lg sm:text-xl text-gray-700 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
-         不仅仅是可视化，更有 AI 驱动的质量评估、流程分析、布鲁姆认知编码和信息增益推算。让每一次对话都产生价值洞察。
+         不仅仅是可视化统计，更有 <span className="font-semibold text-purple-600 dark:text-purple-400">AI 驱动的深度分析</span>：质量评估（DeepEval）、流程分析、布鲁姆认知编码、信息增益推算。<br/>
+         <span className="text-base text-gray-600 dark:text-gray-400">启发式算法 + LLM混合策略，即时响应，隐私优先。</span>
         </p>
         <div className="flex justify-center space-x-4">
           <Link href="/dashboard">
@@ -84,7 +85,7 @@ function HeroSection() {
               Get Started <ArrowRight className="ml-2" />
             </Button>
           </Link>
-          <Link href="https://github.com/meetpateltech/convelyze">
+          <Link href="https://github.com/wyw121/ConveVisAna">
             <Button size="lg" className="rounded-full px-6 sm:px-8 py-4 sm:py-6 text-base text-white sm:text-lg mb-12 bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-700 hover:to-teal-700 transition-all duration-300 shadow-lg hover:shadow-xl">
               Source Code <Github className="ml-2" />
             </Button>
@@ -108,31 +109,31 @@ function FeaturesSection() {
         <FeatureCard 
           icon={<Brain />}
           title="AI 质量评估"
-          description="基于 DeepEval 框架，自动评估对话相关性、有用性、连贯性、毒性和偏见等5大指标。"
+          description="基于 DeepEval 框架 + 硅基流动 API，支持 Qwen2.5-7B-Instruct 等多模型。自动评估相关性、有用性、连贯性、毒性和偏见等5大指标，生成结构化评分报告。"
           color="from-purple-500 to-violet-500"
         />
         <FeatureCard 
           icon={<TrendingUp />}
           title="流程分析"
-          description="智能识别问题类型（规划、工具、架构等），分析对话流程模式和复杂度。"
+          description="智能识别10+问题类型（规划、工具、架构、功能、质量等），分析对话流程模式、情感趋势和复杂度分布。提供详细的轮次级别洞察。"
           color="from-blue-500 to-cyan-500"
         />
         <FeatureCard 
           icon={<Sparkles />}
           title="布鲁姆认知编码"
-          description="基于布鲁姆分类法，将对话分解为6个认知层级（记忆/理解/应用/分析/评价/创造）。"
+          description="基于布鲁姆认知分类法（Bloom's Taxonomy），将对话映射到6个层级：Remember→Understand→Apply→Analyze→Evaluate→Create。可视化认知层级分布，提供代表性样例。"
           color="from-pink-500 to-rose-500"
         />
         <FeatureCard 
           icon={<BarChart2 />}
           title="信息增益推算"
-          description="通过 KL 散度计算对话信息增益，评估每次交互带来的实际价值。"
+          description="使用 KL 散度（Kullback-Leibler Divergence）计算对话信息增益：IG = DKL(P∥Q) × R × C。量化每次交互的实际价值，提供 P vs Q 分布对比图。"
           color="from-amber-500 to-orange-500"
         />
         <FeatureCard 
           icon={<Shield />}
           title="隐私优先"
-          description="启发式算法在前端计算，0 API 调用成本。质量评估可选后端处理。"
+          description="布鲁姆认知编码和信息增益推算采用启发式算法，完全在前端计算（<30ms响应）。质量评估可选后端处理，支持本地部署。数据不留存。"
           color="from-green-500 to-teal-500"
         />
         <FeatureCard 
@@ -210,25 +211,25 @@ function HowToUseSection() {
           number={1}
           title="导出 ChatGPT 数据"
           description="访问 chatgpt.com，打开 Profile -> Settings -> Data controls，点击 'Export data'。"
-          imageSrc="https://cdn.jsdelivr.net/gh/meetpateltech/convelyze@main/public/step-1.png"
+          imageSrc="/step-1.png"
         />
         <StepCard 
           number={2}
           title="接收导出邮件"
           description="等待 OpenAI 发送数据导出邮件。运气好的话几分钟内到达，否则可能需要几周时间。"
-          imageSrc="https://cdn.jsdelivr.net/gh/meetpateltech/convelyze@main/public/step-2.png"
+          imageSrc="/step-2.png"
         />
         <StepCard 
           number={3}
           title="上传文件到 Dashboard"
-          description="解压 zip 文件，将 conversations.json 上传到 Dashboard 页面查看可视化分析。"
-          imageSrc="https://cdn.jsdelivr.net/gh/meetpateltech/convelyze@main/public/step-3.png"
+          description="解压 zip 文件，将 conversations.json 上传到 Dashboard 页面。可立即查看基础可视化分析（消息统计、模型使用、活动日历等）。"
+          imageSrc="/step-3.png"
         />
         <StepCard 
           number={4}
           title="启动 Deep Analysis"
-          description="切换到 Deep Analysis 模式，运行质量评估和流程分析，自动生成布鲁姆认知编码和信息增益报告。"
-          imageSrc="https://cdn.jsdelivr.net/gh/meetpateltech/convelyze@main/public/step-3.png"
+          description="切换到 Deep Analysis 模式，运行质量评估和流程分析，即可自动生成布鲁姆认知编码（6层级认知分类）和信息增益推算（KL散度计算）报告。0 API调用成本，<30ms响应时间。"
+          imageSrc="/dashboard.png"
         />
       </div>
     </section>
